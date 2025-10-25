@@ -1,6 +1,12 @@
-.vscode
-.mypy_cache
+# Django #
 __pycache__/
 
+# mypy 
+.mypy_cache/ 
+
+# vscode
+.vscode
+
+# Environment
 .env
 .env*
