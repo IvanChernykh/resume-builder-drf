@@ -57,4 +57,3 @@ def login(request: Request):
 @api_view(["POST"])
 def logout(request: Request):
     return Response("Hello world")
-    return Response("Hello world")
