@@ -1,11 +1,33 @@
 from django.contrib.auth.hashers import check_password
+from rest_framework import status
+from rest_framework.response import Response
 
 from apps.users.models import UserModel
 from libs.jwt_auth.token import JwtTokenPair, generate_jwt_pair
 
 
-def get_tokens_for_user(user) -> JwtTokenPair:
-    return generate_jwt_pair({"sub": user["id"]})
+def get_tokens_for_user(user: UserModel) -> JwtTokenPair:
+    return generate_jwt_pair({"sub": str(user.id)})
+
+
+def set_refresh_token_cookie(response: Response, token: str):
+    response.set_cookie(
+        key="refresh_token",
+        value=token,
+        httponly=True,
+        secure=False,  # TODO: should be True if isProd
+        samesite="None",
+        max_age=7 * 24 * 60 * 60,
+    )
+
+
+def get_token_pair_response(user: UserModel):
+    tokens = get_tokens_for_user(user)
+    response = Response({"access_token": tokens["access"]}, status=status.HTTP_200_OK)
+
+    set_refresh_token_cookie(response, tokens["refresh"])
+
+    return response
 
 
 def authenticate_user(data: dict[str, str]) -> UserModel | None:

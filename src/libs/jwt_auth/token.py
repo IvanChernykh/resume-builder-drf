@@ -1,4 +1,3 @@
-# import os
 from datetime import datetime, timedelta, timezone
 from typing import TypedDict
 
@@ -67,7 +66,6 @@ def validate_jwt_token(token: str, is_access_token):
         return decoded
     except jwt.ExpiredSignatureError:
         print("Token exired")
-        raise jwt.ExpiredSignatureError()
         return None
     except jwt.InvalidTokenError as e:
         print(f"invalit token: {e}")

@@ -8,7 +8,7 @@ class UserModel(models.Model):
 
     name = models.CharField(max_length=100)
     username = models.CharField(max_length=100, unique=True)
-    email = models.EmailField(max_length=128)
+    email = models.EmailField(max_length=128, unique=True)
     # email_verified = models.BooleanField(default=False)
     password = models.CharField(max_length=128)
 

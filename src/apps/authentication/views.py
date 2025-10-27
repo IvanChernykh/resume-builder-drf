@@ -1,50 +1,41 @@
 from typing import cast
 
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes
 from rest_framework.request import Request
 from rest_framework.response import Response
 
 from apps.authentication.serializers import LoginSerializer, RegisterSerializer
-from apps.authentication.services import authenticate_user, get_tokens_for_user
+from apps.authentication.services import authenticate_user, get_token_pair_response
+from apps.users.models import UserModel
+from libs.jwt_auth.token import validate_jwt_token
 
 
+# TODO: token rotation
 @api_view(["POST"])
-def register(request: Request):
+@authentication_classes([])
+def register_view(request: Request):
     serializer = RegisterSerializer(data=request.data)
 
     if serializer.is_valid():
-        user = serializer.save()
-
-        return Response(get_tokens_for_user(user), status=status.HTTP_201_CREATED)
+        user = cast(UserModel, serializer.save())
+        return get_token_pair_response(user)
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["POST"])
-def login(request: Request):
+@authentication_classes([])
+def login_view(request: Request):
     serializer = LoginSerializer(data=request.data)
 
     if serializer.is_valid():
         data = cast(dict[str, str], serializer.validated_data)
+
         user = authenticate_user(data)
 
         if user:
-            tokens = get_tokens_for_user(user)
-            response = Response(
-                {"access_token": tokens["access"]}, status=status.HTTP_200_OK
-            )
-
-            response.set_cookie(
-                key="refresh_token",
-                value=tokens["refresh"],
-                httponly=True,
-                secure=False,  # TODO: should be True if isProd
-                samesite="None",
-                max_age=7 * 24 * 60 * 60,
-            )
-
-            return response
+            return get_token_pair_response(user)
         else:
             return Response(
                 {"message": "email or password does not match"},
@@ -55,5 +46,21 @@ def login(request: Request):
 
 
 @api_view(["POST"])
-def logout(request: Request):
+@authentication_classes([])
+def refresh_token_view(request: Request):
+    refresh_token = request.COOKIES.get("refresh_token")
+
+    validated = validate_jwt_token(refresh_token, is_access_token=False)
+
+    if validated:
+        user = UserModel.objects.get(pk=validated["sub"])
+
+        if user:
+            return get_token_pair_response(user)
+
+    return Response({"message": "invalid token"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["POST"])
+def logout_view(request: Request):
     return Response("Hello world")
