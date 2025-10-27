@@ -1,23 +1,11 @@
-from typing import TypedDict
-
 from django.contrib.auth.hashers import check_password
-from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.users.models import UserModel
-
-
-class JwtTokenPair(TypedDict):
-    access: str
-    refresh: str
+from libs.jwt_auth.token import JwtTokenPair, generate_jwt_pair
 
 
 def get_tokens_for_user(user) -> JwtTokenPair:
-    refresh = RefreshToken.for_user(user)
-
-    return {
-        "refresh": str(refresh),
-        "access": str(refresh.access_token),
-    }
+    return generate_jwt_pair({"sub": user["id"]})
 
 
 def authenticate_user(data: dict[str, str]) -> UserModel | None:

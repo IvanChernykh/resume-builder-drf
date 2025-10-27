@@ -19,6 +19,11 @@ class JwtPayload(TypedDict):
     sub: str | int
 
 
+class JwtTokenPair(TypedDict):
+    access: str
+    refresh: str
+
+
 def create_jwt_token(
     payload: JwtPayload,
     secret: str,
@@ -34,7 +39,7 @@ def create_jwt_token(
     return token
 
 
-def generate_pair(payload: JwtPayload):
+def generate_jwt_pair(payload: JwtPayload) -> JwtTokenPair:
     return {
         "access": create_jwt_token(
             payload, jwt_settings["access_secret"], jwt_settings["access_exp"]
