@@ -3,8 +3,8 @@ from rest_framework.decorators import api_view
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from users.models import UserModel
-from users.serializers import UserSerializer
+from apps.users.models import UserModel
+from apps.users.serializers import UserSerializer
 
 
 @api_view(["GET"])

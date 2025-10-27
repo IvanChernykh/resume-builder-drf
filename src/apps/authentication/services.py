@@ -3,7 +3,7 @@ from typing import TypedDict
 from django.contrib.auth.hashers import check_password
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from users.models import UserModel
+from apps.users.models import UserModel
 
 
 class JwtTokenPair(TypedDict):

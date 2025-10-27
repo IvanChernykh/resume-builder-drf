@@ -1,7 +1,7 @@
 from django.contrib.auth.hashers import make_password
 from rest_framework import serializers
 
-from users.models import UserModel
+from apps.users.models import UserModel
 
 
 class RegisterSerializer(serializers.ModelSerializer):

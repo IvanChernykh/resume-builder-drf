@@ -5,8 +5,8 @@ from rest_framework.decorators import api_view
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from authentication.serializers import LoginSerializer, RegisterSerializer
-from authentication.services import authenticate_user, get_tokens_for_user
+from apps.authentication.serializers import LoginSerializer, RegisterSerializer
+from apps.authentication.services import authenticate_user, get_tokens_for_user
 
 
 @api_view(["POST"])
@@ -56,4 +56,5 @@ def login(request: Request):
 
 @api_view(["POST"])
 def logout(request: Request):
+    return Response("Hello world")
     return Response("Hello world")

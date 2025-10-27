@@ -25,9 +25,10 @@ urlpatterns = [
         include(
             [
                 path(
-                    "auth/", include("authentication.urls", namespace="authentication")
+                    "auth/",
+                    include("apps.authentication.urls", namespace="authentication"),
                 ),
-                path("users/", include("users.urls", namespace="users")),
+                path("users/", include("apps.users.urls", namespace="users")),
             ]
         ),
     ),
