@@ -63,4 +63,8 @@ def refresh_token_view(request: Request):
 
 @api_view(["POST"])
 def logout_view(request: Request):
-    return Response("Hello world")
+    response = Response(status=status.HTTP_204_NO_CONTENT)
+
+    response.delete_cookie("refresh_token")
+
+    return response
