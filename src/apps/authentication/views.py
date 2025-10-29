@@ -6,8 +6,13 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from apps.authentication.serializers import LoginSerializer, RegisterSerializer
-from apps.authentication.services import authenticate_user, get_token_pair_response
+from apps.authentication.services import (
+    authenticate_user,
+    get_redis_jwt_name,
+    get_token_pair_response,
+)
 from apps.users.models import UserModel
+from config.settings.redis import REDIS_JWT
 from libs.jwt_auth.token import validate_jwt_token
 
 
@@ -55,7 +60,7 @@ def refresh_token_view(request: Request):
     if validated:
         user = UserModel.objects.get(pk=validated["sub"])
 
-        if user:
+        if user and REDIS_JWT.get(get_redis_jwt_name(user)):
             return get_token_pair_response(user)
 
     return Response({"message": "invalid token"}, status=status.HTTP_400_BAD_REQUEST)
@@ -64,7 +69,8 @@ def refresh_token_view(request: Request):
 @api_view(["POST"])
 def logout_view(request: Request):
     response = Response(status=status.HTTP_204_NO_CONTENT)
-
+    print(REDIS_JWT.get(get_redis_jwt_name(request.user)))
+    REDIS_JWT.delete(get_redis_jwt_name(request.user))
     response.delete_cookie("refresh_token")
 
     return response
