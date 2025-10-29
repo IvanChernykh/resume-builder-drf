@@ -69,7 +69,7 @@ def refresh_token_view(request: Request):
 @api_view(["POST"])
 def logout_view(request: Request):
     response = Response(status=status.HTTP_204_NO_CONTENT)
-    print(REDIS_JWT.get(get_redis_jwt_name(request.user)))
+
     REDIS_JWT.delete(get_redis_jwt_name(request.user))
     response.delete_cookie("refresh_token")
 
