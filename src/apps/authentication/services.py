@@ -1,3 +1,4 @@
+import hashlib
 import os
 
 from django.contrib.auth.hashers import check_password
@@ -11,9 +12,9 @@ from config.settings.redis import REDIS_JWT
 from libs.jwt_auth.token import JwtTokenPair, generate_jwt_pair
 
 
-def get_redis_jwt_name(user: UserModel) -> str:
-    # TODO: change name, cause user can have only one active session right now
-    return str(user.id)
+def get_redis_jwt_name(user: UserModel, token="") -> str:
+    token_hash = hashlib.sha256(token.encode()).hexdigest()[:16]
+    return f"{str(user.id)}_{token_hash}"
 
 
 def get_tokens_for_user(user: UserModel) -> JwtTokenPair:
@@ -36,7 +37,7 @@ def get_token_pair_response(user: UserModel) -> Response:
     response = Response({"access_token": tokens["access"]}, status=status.HTTP_200_OK)
 
     REDIS_JWT.set(
-        name=get_redis_jwt_name(user),
+        name=get_redis_jwt_name(user, tokens["refresh"]),
         value=tokens["refresh"],
         ex=JWT_REFRESH_TTL_SECONDS,
     )

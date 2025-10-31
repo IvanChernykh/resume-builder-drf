@@ -71,8 +71,11 @@ def refresh_token_view(request: Request):
 def logout_view(request: Request):
     response = Response(status=status.HTTP_204_NO_CONTENT)
 
-    REDIS_JWT.delete(get_redis_jwt_name(request.user))
-    response.delete_cookie("refresh_token")
+    refresh_token = request.COOKIES.get("refresh_token")
+
+    if refresh_token:
+        REDIS_JWT.delete(get_redis_jwt_name(request.user, refresh_token))
+        response.delete_cookie("refresh_token")
 
     return response
 
