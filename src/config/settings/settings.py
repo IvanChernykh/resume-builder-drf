@@ -121,3 +121,7 @@ REST_FRAMEWORK = {
         "libs.jwt_auth.authentication.JwtAuthentication",
     ],
 }
+
+# email
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

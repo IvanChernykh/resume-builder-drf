@@ -5,11 +5,13 @@ from rest_framework.decorators import api_view, authentication_classes
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from apps.authentication.models import EmailConfirmationTokenModel
 from apps.authentication.serializers import LoginSerializer, RegisterSerializer
 from apps.authentication.services import (
     authenticate_user,
     get_redis_jwt_name,
     get_token_pair_response,
+    send_verification_email,
 )
 from apps.users.models import UserModel
 from config.settings.redis import REDIS_JWT
@@ -73,3 +75,42 @@ def logout_view(request: Request):
     response.delete_cookie("refresh_token")
 
     return response
+
+
+@api_view(["POST"])
+def send_verification_email_view(request: Request):
+    user = request.user
+
+    EmailConfirmationTokenModel.objects.filter(user=user).delete()
+
+    new_token = EmailConfirmationTokenModel.objects.create(user=user)
+
+    return send_verification_email(user, str(new_token.id))
+
+
+@api_view(["GET"])
+def confirm_email_view(request: Request, token: str):
+    user: UserModel = request.user
+
+    try:
+        confirmation_token = EmailConfirmationTokenModel.objects.select_related(
+            "user"
+        ).get(pk=token)
+    except EmailConfirmationTokenModel.DoesNotExist:
+        return Response(
+            {"message": "token not found"}, status=status.HTTP_404_NOT_FOUND
+        )
+
+    if confirmation_token.is_expired or not confirmation_token.belongs_to_user(user):
+        return Response(
+            {"message": "invalid token"}, status=status.HTTP_401_UNAUTHORIZED
+        )
+
+    user.email_verified = True
+    user.save(update_fields=["email_verified"])
+
+    confirmation_token.delete()
+
+    return Response(
+        {"message": "Your email has been verified"}, status=status.HTTP_200_OK
+    )

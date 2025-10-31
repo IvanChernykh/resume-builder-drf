@@ -1,3 +1,5 @@
 from django.contrib import admin
 
-# Register your models here.
+from apps.authentication.models import EmailConfirmationTokenModel
+
+admin.site.register(EmailConfirmationTokenModel)

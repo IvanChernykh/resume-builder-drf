@@ -1,4 +1,7 @@
+import os
+
 from django.contrib.auth.hashers import check_password
+from django.core.mail import send_mail
 from rest_framework import status
 from rest_framework.response import Response
 
@@ -56,3 +59,31 @@ def authenticate_user(data: dict[str, str]) -> UserModel | None:
         return None
 
     return user
+
+
+def send_verification_email(user: UserModel, token: str) -> Response:
+    verify_url = f"{os.getenv('FRONTEND_URL')}/verify-email/?token={token}"
+
+    message = f"""
+    Hello, {user.username}!
+    Please confirm your email address by clicking the link below:
+    {verify_url}
+    """
+
+    try:
+        send_mail(
+            subject="Email confirmation",
+            message=message,
+            recipient_list=[user.email],
+            from_email="noreply@resumebuilder.com",
+        )
+        return Response(
+            {"message": "Verification email has been sent to your email adress"},
+            status=status.HTTP_200_OK,
+        )
+    except Exception as e:
+        print(f"ERROR DUDE: {e}")
+
+        return Response(
+            {"message": "Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
