@@ -11,7 +11,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         extra_kwargs = {"password": {"write_only": True}}
 
     def create(self, validated_data):
-        # TODO: add salt
         validated_data["password"] = make_password(validated_data["password"])
 
         user = UserModel.objects.create(**validated_data)

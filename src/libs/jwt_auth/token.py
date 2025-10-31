@@ -27,7 +27,7 @@ def create_jwt_token(
     payload: JwtPayload,
     secret: str,
     exp: timedelta,
-):
+) -> str:
     jwt_payload: dict = {
         **payload,
         "exp": datetime.now(timezone.utc) + exp,

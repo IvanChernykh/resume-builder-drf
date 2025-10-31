@@ -16,7 +16,6 @@ from config.settings.redis import REDIS_JWT
 from libs.jwt_auth.token import validate_jwt_token
 
 
-# TODO: token rotation
 @api_view(["POST"])
 @authentication_classes([])
 def register_view(request: Request):

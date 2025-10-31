@@ -9,6 +9,7 @@ from libs.jwt_auth.token import JwtTokenPair, generate_jwt_pair
 
 
 def get_redis_jwt_name(user: UserModel) -> str:
+    # TODO: change name, cause user can have only one active session right now
     return str(user.id)
 
 
@@ -16,7 +17,7 @@ def get_tokens_for_user(user: UserModel) -> JwtTokenPair:
     return generate_jwt_pair({"sub": str(user.id)})
 
 
-def set_refresh_token_cookie(response: Response, token: str):
+def set_refresh_token_cookie(response: Response, token: str) -> None:
     response.set_cookie(
         key="refresh_token",
         value=token,
@@ -27,11 +28,10 @@ def set_refresh_token_cookie(response: Response, token: str):
     )
 
 
-def get_token_pair_response(user: UserModel):
+def get_token_pair_response(user: UserModel) -> Response:
     tokens = get_tokens_for_user(user)
     response = Response({"access_token": tokens["access"]}, status=status.HTTP_200_OK)
 
-    # TODO: change name, cause user can have only one active session right now
     REDIS_JWT.set(
         name=get_redis_jwt_name(user),
         value=tokens["refresh"],
