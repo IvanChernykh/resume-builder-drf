@@ -1,15 +1,10 @@
-from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.request import Request
-from rest_framework.response import Response
 
-from apps.resume.models import ResumeTemplateModel
-from apps.resume.serializers.resume_template_serializer import ResumeTemplateSerializer
+from apps.resume.services.resume_template_services import get_all_resume_templates
 
 
 @api_view(["GET"])
-def get_all_resume_templates(request: Request):
-    resume_templates = ResumeTemplateModel.objects.all()
-    serializer = ResumeTemplateSerializer(resume_templates, many=True)
-
-    return Response(serializer.data, status=status.HTTP_200_OK)
+def resume_template_view(request: Request):
+    if request.method == "GET":
+        return get_all_resume_templates(request)

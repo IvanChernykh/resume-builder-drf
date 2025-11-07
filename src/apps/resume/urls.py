@@ -1,11 +1,11 @@
 from django.urls import path
 
-from apps.resume.views.resume_template_views import get_all_resume_templates
-from apps.resume.views.resume_views import create_resume
+from apps.resume.views.resume_template_views import resume_template_view
+from apps.resume.views.resume_views import resume_view
 
 app_name = "apps.resume"
 
 urlpatterns = [
-    path("resume/template/", get_all_resume_templates, name="get_resume_templates"),
-    path("resume/", create_resume, name="create_resume"),
+    path("resume/template/", resume_template_view, name="resume_template"),
+    path("resume/", resume_view, name="resume"),
 ]

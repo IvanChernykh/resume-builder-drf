@@ -1,17 +1,10 @@
-from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.request import Request
-from rest_framework.response import Response
 
-from apps.resume.serializers.resume_serializer import CreateResumeSerializer
+from apps.resume.services.resume_services import create_resume
 
 
 @api_view(["POST"])
-def create_resume(request: Request):
-    serializer = CreateResumeSerializer(data=request.data, context={"request": request})
-
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+def resume_view(request: Request):
+    if request.method == "POST":
+        return create_resume(request)
