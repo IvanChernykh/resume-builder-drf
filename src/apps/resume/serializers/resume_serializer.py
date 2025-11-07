@@ -1,10 +1,27 @@
+from typing import Any
+
 from rest_framework import serializers
 
-from apps.resume.models import ResumeModel
+from apps.resume.models import ResumeModel, ResumeTemplateModel
 from apps.users.models import UserModel
 
 
+class ResumeTemplateNestedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ResumeTemplateModel
+        fields = ["id", "name"]
+
+
 class CreateResumeSerializer(serializers.ModelSerializer):
+
+    template = ResumeTemplateNestedSerializer(read_only=True)
+
+    template_id = serializers.PrimaryKeyRelatedField(
+        queryset=ResumeTemplateModel.objects.all(),
+        source="template",
+        write_only=True,
+    )
+
     class Meta:
         model = ResumeModel
         fields = [
@@ -19,11 +36,13 @@ class CreateResumeSerializer(serializers.ModelSerializer):
             "city",
             "summary",
             "template",
+            "template_id",
+            "created_at",
+            "updated_at",
         ]
-        read_only_fields = ["id"]
+        read_only_fields = ["id", "created_at", "updated_at"]
 
-    def create(self, validated_data):
+    def create(self, validated_data: dict[str, Any]):
         owner: UserModel = self.context["request"].user
-        resume = ResumeModel.objects.create(**validated_data, owner=owner)
 
-        return resume
+        return ResumeModel.objects.create(**validated_data, owner=owner)

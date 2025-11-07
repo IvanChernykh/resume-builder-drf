@@ -8,10 +8,10 @@ from apps.resume.serializers.resume_serializer import CreateResumeSerializer
 
 @api_view(["POST"])
 def create_resume(request: Request):
-    serializer = CreateResumeSerializer(data=request.data)
+    serializer = CreateResumeSerializer(data=request.data, context={"request": request})
 
     if serializer.is_valid():
-        data = serializer.save()
-        return Response(data, status=status.HTTP_201_CREATED)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
