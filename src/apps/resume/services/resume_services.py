@@ -45,3 +45,10 @@ def update_resume(request: Request, resume_id: str):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+def delete_resume(request: Request, resume_id: str):
+    resume = get_object_or_404(ResumeModel, pk=resume_id, owner=request.user)
+    resume.delete()
+
+    return Response({"message": "success"}, status=status.HTTP_204_NO_CONTENT)
