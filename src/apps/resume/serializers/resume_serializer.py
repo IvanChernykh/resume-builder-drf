@@ -46,3 +46,48 @@ class CreateResumeSerializer(serializers.ModelSerializer):
         owner: UserModel = self.context["request"].user
 
         return ResumeModel.objects.create(**validated_data, owner=owner)
+
+
+class GetResumeSerializer(serializers.ModelSerializer):
+    template = ResumeTemplateNestedSerializer(read_only=True)
+
+    class Meta:
+        model = ResumeModel
+        fields = [
+            "id",
+            "resume_name",
+            "job_title",
+            "first_name",
+            "last_name",
+            "email",
+            "phone",
+            "country",
+            "city",
+            "summary",
+            "template",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class UpdateResumeSerializer(serializers.ModelSerializer):
+    template = ResumeTemplateNestedSerializer(read_only=True)
+
+    class Meta:
+        model = ResumeModel
+        fields = [
+            "id",
+            "resume_name",
+            "job_title",
+            "first_name",
+            "last_name",
+            "email",
+            "phone",
+            "country",
+            "city",
+            "summary",
+            "template",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "template", "created_at", "updated_at"]
