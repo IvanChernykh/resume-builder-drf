@@ -51,4 +51,4 @@ def delete_resume(request: Request, resume_id: str):
     resume = get_object_or_404(ResumeModel, pk=resume_id, owner=request.user)
     resume.delete()
 
-    return Response({"message": "success"}, status=status.HTTP_204_NO_CONTENT)
+    return Response(status=status.HTTP_204_NO_CONTENT)

@@ -1,5 +1,6 @@
 from typing import cast
 
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import api_view, authentication_classes
 from rest_framework.request import Request
@@ -16,8 +17,18 @@ from apps.authentication.services import (
 from apps.users.models import UserModel
 from config.settings.redis import REDIS_JWT
 from libs.jwt_auth.token import validate_jwt_token
+from utils.constants.drf_spectacular import (
+    ACCESS_TOKEN_API_RESPONSE,
+    AUTH_API_HEADER,
+    MESSAGE_SUCCESS_API_RESPONSE,
+)
 
 
+@extend_schema(
+    methods=["POST"],
+    request=RegisterSerializer,
+    responses={200: ACCESS_TOKEN_API_RESPONSE},
+)
 @api_view(["POST"])
 @authentication_classes([])
 def register_view(request: Request):
@@ -30,6 +41,11 @@ def register_view(request: Request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@extend_schema(
+    methods=["POST"],
+    request=LoginSerializer,
+    responses={200: ACCESS_TOKEN_API_RESPONSE},
+)
 @api_view(["POST"])
 @authentication_classes([])
 def login_view(request: Request):
@@ -51,6 +67,10 @@ def login_view(request: Request):
     return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
 
 
+@extend_schema(
+    methods=["POST"],
+    responses={200: ACCESS_TOKEN_API_RESPONSE},
+)
 @api_view(["POST"])
 @authentication_classes([])
 def refresh_token_view(request: Request):
@@ -67,6 +87,11 @@ def refresh_token_view(request: Request):
     return Response({"message": "invalid token"}, status=status.HTTP_400_BAD_REQUEST)
 
 
+@extend_schema(
+    methods=["POST"],
+    responses={204: None},
+    parameters=[AUTH_API_HEADER],
+)
 @api_view(["POST"])
 def logout_view(request: Request):
     response = Response(status=status.HTTP_204_NO_CONTENT)
@@ -80,6 +105,11 @@ def logout_view(request: Request):
     return response
 
 
+@extend_schema(
+    methods=["POST"],
+    responses={200: MESSAGE_SUCCESS_API_RESPONSE},
+    parameters=[AUTH_API_HEADER],
+)
 @api_view(["POST"])
 def send_verification_email_view(request: Request):
     user = request.user
@@ -91,6 +121,11 @@ def send_verification_email_view(request: Request):
     return send_verification_email(user, str(new_token.id))
 
 
+@extend_schema(
+    methods=["GET"],
+    responses={200: MESSAGE_SUCCESS_API_RESPONSE},
+    parameters=[AUTH_API_HEADER],
+)
 @api_view(["GET"])
 def confirm_email_view(request: Request, token: str):
     user: UserModel = request.user

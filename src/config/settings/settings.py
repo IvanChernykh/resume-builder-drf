@@ -43,6 +43,10 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
 ]
 
+if DEBUG:
+    INSTALLED_APPS += ["drf_spectacular"]
+
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -117,10 +121,20 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # rest framework
-REST_FRAMEWORK = {
+REST_FRAMEWORK: dict = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "libs.jwt_auth.authentication.JwtAuthentication",
     ],
+}
+
+if DEBUG:
+    REST_FRAMEWORK["DEFAULT_SCHEMA_CLASS"] = "drf_spectacular.openapi.AutoSchema"
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Resume Builder API",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    # OTHER SETTINGS
 }
 
 # email

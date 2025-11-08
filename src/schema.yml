@@ -1,0 +1,161 @@
+openapi: 3.0.3
+info:
+  title: Your Project API
+  version: 1.0.0
+  description: Your project description
+paths:
+  /api/auth/confirm-emal/{token}/:
+    get:
+      operationId: auth_confirm_emal_retrieve
+      parameters:
+      - in: path
+        name: token
+        schema:
+          type: string
+        required: true
+      tags:
+      - auth
+      security:
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/auth/login/:
+    post:
+      operationId: auth_login_create
+      tags:
+      - auth
+      security:
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/auth/logout/:
+    post:
+      operationId: auth_logout_create
+      tags:
+      - auth
+      security:
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/auth/refresh-token/:
+    post:
+      operationId: auth_refresh_token_create
+      tags:
+      - auth
+      security:
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/auth/register/:
+    post:
+      operationId: auth_register_create
+      tags:
+      - auth
+      security:
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/auth/send-verification-email/:
+    post:
+      operationId: auth_send_verification_email_create
+      tags:
+      - auth
+      security:
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/resume/:
+    get:
+      operationId: resume_retrieve
+      tags:
+      - resume
+      security:
+      - {}
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: resume_create
+      tags:
+      - resume
+      security:
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/resume/{resume_id}/:
+    get:
+      operationId: resume_retrieve_2
+      parameters:
+      - in: path
+        name: resume_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - resume
+      security:
+      - {}
+      responses:
+        '200':
+          description: No response body
+    put:
+      operationId: resume_update
+      parameters:
+      - in: path
+        name: resume_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - resume
+      security:
+      - {}
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: resume_destroy
+      parameters:
+      - in: path
+        name: resume_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - resume
+      security:
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/resume/template/:
+    get:
+      operationId: resume_template_retrieve
+      tags:
+      - resume
+      security:
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/users/me/:
+    get:
+      operationId: users_me_retrieve
+      tags:
+      - users
+      security:
+      - {}
+      responses:
+        '200':
+          description: No response body
+components: {}
