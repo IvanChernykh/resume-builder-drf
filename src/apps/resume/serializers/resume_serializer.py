@@ -43,7 +43,7 @@ class CreateResumeSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "created_at", "updated_at"]
 
     def create(self, validated_data: dict[str, Any]):
-        owner: UserModel = self.context["request"].user
+        owner: UserModel = self.context["user"]
 
         return ResumeModel.objects.create(**validated_data, owner=owner)
 

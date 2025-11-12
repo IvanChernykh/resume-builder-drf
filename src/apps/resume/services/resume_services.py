@@ -1,6 +1,5 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.request import Request
 from rest_framework.response import Response
 
 from apps.resume.models import ResumeModel
@@ -9,10 +8,11 @@ from apps.resume.serializers.resume_serializer import (
     GetResumeSerializer,
     UpdateResumeSerializer,
 )
+from apps.users.models import UserModel
 
 
-def create_resume(request: Request):
-    serializer = CreateResumeSerializer(data=request.data, context={"request": request})
+def create_resume(user: UserModel, data: dict):
+    serializer = CreateResumeSerializer(data=data, context={"user": user})
 
     if serializer.is_valid():
         serializer.save()
@@ -21,24 +21,24 @@ def create_resume(request: Request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-def get_all_user_resumes(request: Request):
-    resumes = ResumeModel.objects.filter(owner=request.user)
+def get_all_user_resumes(user: UserModel):
+    resumes = ResumeModel.objects.filter(owner=user)
 
     serializer = GetResumeSerializer(resumes, many=True)
 
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-def get_resume(request: Request, resume_id: str):
-    resume = get_object_or_404(ResumeModel, pk=resume_id, owner=request.user)
+def get_resume(user: UserModel, resume_id: str):
+    resume = get_object_or_404(ResumeModel, pk=resume_id, owner=user)
     serializer = GetResumeSerializer(resume)
 
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-def update_resume(request: Request, resume_id: str):
-    resume = get_object_or_404(ResumeModel, pk=resume_id, owner=request.user)
-    serializer = UpdateResumeSerializer(instance=resume, data=request.data)
+def update_resume(data: dict, user: UserModel, resume_id: str):
+    resume = get_object_or_404(ResumeModel, pk=resume_id, owner=user)
+    serializer = UpdateResumeSerializer(instance=resume, data=data)
 
     if serializer.is_valid():
         serializer.save()
@@ -47,8 +47,8 @@ def update_resume(request: Request, resume_id: str):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-def delete_resume(request: Request, resume_id: str):
-    resume = get_object_or_404(ResumeModel, pk=resume_id, owner=request.user)
+def delete_resume(user: UserModel, resume_id: str):
+    resume = get_object_or_404(ResumeModel, pk=resume_id, owner=user)
     resume.delete()
 
     return Response(status=status.HTTP_204_NO_CONTENT)

@@ -15,4 +15,4 @@ from utils.constants.drf_spectacular import AUTH_API_HEADER
 @api_view(["GET"])
 def resume_template_view(request: Request):
     if request.method == "GET":
-        return get_all_resume_templates(request)
+        return get_all_resume_templates()
