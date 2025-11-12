@@ -1,7 +1,9 @@
+from typing import cast
+
 from drf_spectacular.utils import extend_schema
 from rest_framework.decorators import api_view
 from rest_framework.request import Request
-from typing import cast
+
 from apps.resume.serializers.resume_serializer import (
     CreateResumeSerializer,
     GetResumeSerializer,
