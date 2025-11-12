@@ -21,6 +21,9 @@ plugins = ["mypy_django_plugin.main"]
 [tool.black]
 line-length = 88
 
+[tool.isort]
+skip = ["migrations", "venv", "node_modules", "build"]
+
 [tool.django-stubs]
 django_settings_module = "myproject.settings"
 
