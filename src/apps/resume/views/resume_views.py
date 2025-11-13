@@ -45,7 +45,7 @@ def resume_view(request: Request):
     responses={200: GetResumeSerializer},
 )
 @extend_schema(
-    methods=["PUT"],
+    methods=["PATCH"],
     request=UpdateResumeSerializer,
     responses={200: UpdateResumeSerializer},
 )
