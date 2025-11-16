@@ -3,6 +3,15 @@ from typing import Any
 from rest_framework import serializers
 
 from apps.resume.models import ResumeModel, ResumeTemplateModel
+from apps.resume.serializers.resume_section_serializer import (
+    CourseGetSerializer,
+    EducationGetSerializer,
+    LanguageGetSerializer,
+    LinkGetSerializer,
+    ProjectGetSerializer,
+    SkillGetSerializer,
+    WorkExperienceGetSerializer,
+)
 from apps.users.models import UserModel
 
 
@@ -49,7 +58,27 @@ class CreateResumeSerializer(serializers.ModelSerializer):
 
 
 class GetResumeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ResumeModel
+        fields = [
+            "id",
+            "resume_name",
+            "job_title",
+            "template",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class GetResumeDetailSerializer(serializers.ModelSerializer):
     template = ResumeTemplateNestedSerializer(read_only=True)
+    work_experience = WorkExperienceGetSerializer(many=True, read_only=True)
+    projects = ProjectGetSerializer(many=True, read_only=True)
+    education = EducationGetSerializer(many=True, read_only=True)
+    links = LinkGetSerializer(many=True, read_only=True)
+    skills = SkillGetSerializer(many=True, read_only=True)
+    courses = CourseGetSerializer(many=True, read_only=True)
+    languages = LanguageGetSerializer(many=True, read_only=True)
 
     class Meta:
         model = ResumeModel
@@ -65,6 +94,13 @@ class GetResumeSerializer(serializers.ModelSerializer):
             "city",
             "summary",
             "template",
+            "work_experience",
+            "projects",
+            "education",
+            "links",
+            "skills",
+            "courses",
+            "languages",
             "created_at",
             "updated_at",
         ]

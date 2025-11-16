@@ -6,6 +6,7 @@ from apps.resume.models import ResumeModel
 from apps.resume.serializers.resume_serializer import (
     CreateResumeSerializer,
     GetResumeSerializer,
+    GetResumeDetailSerializer,
     UpdateResumeSerializer,
 )
 from apps.users.models import UserModel
@@ -31,7 +32,7 @@ def get_all_user_resumes(user: UserModel):
 
 def get_resume(user: UserModel, resume_id: str):
     resume = get_object_or_404(ResumeModel, pk=resume_id, owner=user)
-    serializer = GetResumeSerializer(resume)
+    serializer = GetResumeDetailSerializer(resume)
 
     return Response(serializer.data, status=status.HTTP_200_OK)
 
