@@ -97,7 +97,9 @@ def test_update_resume_section(resume_user_1, user_1, make_education_resume_user
     )
 
     assert response.status_code == status.HTTP_200_OK
-    assert isinstance(res_data["education"], list)
+
+    assert len(res_data["education"]) == 3
+
     assert found is not None
     assert found["city"] == "vice city"
     assert found["degree"] == "wabba jabba"
