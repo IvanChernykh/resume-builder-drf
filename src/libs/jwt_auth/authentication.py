@@ -6,7 +6,7 @@ from libs.jwt_auth.token import validate_jwt_token
 
 
 class JwtAuthentication(authentication.BaseAuthentication):
-    def authenticate(self, request: Request):
+    def authenticate(self, request: Request) -> tuple[UserModel, str]:
         access_token_header: str = request.headers.get("Authorization")
 
         if not access_token_header or not access_token_header.startswith("Bearer "):
@@ -27,4 +27,4 @@ class JwtAuthentication(authentication.BaseAuthentication):
         if not user:
             raise exceptions.AuthenticationFailed()
 
-        return (user, None)
+        return (user, token)
