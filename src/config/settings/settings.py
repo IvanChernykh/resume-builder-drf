@@ -123,7 +123,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # rest framework
 REST_FRAMEWORK: dict = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "libs.jwt_auth.authentication.JwtAuthentication",
+        "libs.middleware.jwt_authentication.JwtAuthentication",
     ],
     "DEFAULT_THROTTLE_CLASSES": [
         "rest_framework.throttling.AnonRateThrottle",
