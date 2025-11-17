@@ -126,10 +126,10 @@ REST_FRAMEWORK: dict = {
         "libs.middleware.jwt_authentication.JwtAuthentication",
     ],
     "DEFAULT_THROTTLE_CLASSES": [
-        "rest_framework.throttling.AnonRateThrottle",
+        "libs.throttling.CustomAnonRateThrottle",
         "libs.throttling.CustomUserRateThrottle",
     ],
-    "DEFAULT_THROTTLE_RATES": {"anon": "300/hour", "user_scope": "2000/hour"},
+    "DEFAULT_THROTTLE_RATES": {"anon_scope": "300/hour", "user_scope": "2000/hour"},
 }
 
 if DEBUG:
