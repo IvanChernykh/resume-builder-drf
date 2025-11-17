@@ -24,6 +24,7 @@ from config.settings.redis import REDIS_JWT
 from config.settings.settings import DEBUG
 from libs.jwt_auth.token import validate_jwt_token
 from libs.middleware.csrf_permission import DoubleSubmitCSRF
+from utils.constants.cookies import COOKIE_CSRF_TOKEN, COOKIE_REFRESH_TOKEN
 from utils.constants.drf_spectacular import (
     ACCESS_TOKEN_API_RESPONSE,
     AUTH_API_HEADER,
@@ -84,7 +85,7 @@ def login_view(request: Request):
 @authentication_classes([])
 @permission_classes([DoubleSubmitCSRF])
 def refresh_token_view(request: Request):
-    refresh_token = request.COOKIES.get("refresh_token")
+    refresh_token = request.COOKIES.get(COOKIE_REFRESH_TOKEN)
 
     validated = validate_jwt_token(refresh_token, is_access_token=False)
 
@@ -106,12 +107,12 @@ def refresh_token_view(request: Request):
 def logout_view(request: Request):
     response = Response(status=status.HTTP_204_NO_CONTENT)
 
-    refresh_token = request.COOKIES.get("refresh_token")
+    refresh_token = request.COOKIES.get(COOKIE_REFRESH_TOKEN)
 
     if refresh_token:
         REDIS_JWT.delete(get_redis_jwt_name(request.user, refresh_token))
-        response.delete_cookie("refresh_token")
-        response.delete_cookie("csrf_token")
+        response.delete_cookie(COOKIE_REFRESH_TOKEN)
+        response.delete_cookie(COOKIE_CSRF_TOKEN)
 
     return response
 
@@ -169,9 +170,9 @@ def confirm_email_view(request: Request, token: str):
 def get_csrf_token_view(request: Request):
     token = secrets.token_urlsafe(32)
 
-    response = Response({"csrf_token": token}, status=status.HTTP_200_OK)
+    response = Response({COOKIE_CSRF_TOKEN: token}, status=status.HTTP_200_OK)
     response.set_cookie(
-        "csrf_token",
+        COOKIE_CSRF_TOKEN,
         token,
         httponly=True,
         secure=not DEBUG,

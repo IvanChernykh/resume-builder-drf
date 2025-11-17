@@ -1,0 +1,2 @@
+HEADER_AUTHORIZATION = "Authorization"
+HEADER_CSRF_TOKEN = "X-CSRF-Token"

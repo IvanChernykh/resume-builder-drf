@@ -11,6 +11,7 @@ from config.settings.jwt import JWT_REFRESH_TTL_SECONDS
 from config.settings.redis import REDIS_JWT
 from config.settings.settings import DEBUG
 from libs.jwt_auth.token import JwtTokenPair, generate_jwt_pair
+from utils.constants.cookies import COOKIE_REFRESH_TOKEN
 
 
 def get_redis_jwt_name(user: UserModel, token="") -> str:
@@ -24,7 +25,7 @@ def get_tokens_for_user(user: UserModel) -> JwtTokenPair:
 
 def set_refresh_token_cookie(response: Response, token: str) -> None:
     response.set_cookie(
-        key="refresh_token",
+        key=COOKIE_REFRESH_TOKEN,
         value=token,
         httponly=True,
         secure=not DEBUG,
