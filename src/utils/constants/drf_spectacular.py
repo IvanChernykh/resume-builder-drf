@@ -13,6 +13,14 @@ AUTH_API_HEADER = OpenApiParameter(
     description="Bearer token",
 )
 
+CSRF_API_HEADER = OpenApiParameter(
+    name="X-CSRFToken",
+    type=str,
+    location=OpenApiParameter.HEADER,
+    required=True,
+    description="CSRF token",
+)
+
 # ---------------------------------------------------------------------
 # responses
 # ---------------------------------------------------------------------

@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from apps.users.models import UserModel
 from config.settings.jwt import JWT_REFRESH_TTL_SECONDS
 from config.settings.redis import REDIS_JWT
+from config.settings.settings import DEBUG
 from libs.jwt_auth.token import JwtTokenPair, generate_jwt_pair
 
 
@@ -26,7 +27,7 @@ def set_refresh_token_cookie(response: Response, token: str) -> None:
         key="refresh_token",
         value=token,
         httponly=True,
-        secure=False,  # TODO: should be True if isProd
+        secure=not DEBUG,
         samesite="None",
         max_age=JWT_REFRESH_TTL_SECONDS,
     )
