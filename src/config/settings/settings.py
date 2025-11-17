@@ -139,7 +139,7 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "Resume Builder API",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
-    # OTHER SETTINGS
+    "ALLOW_DELETE_BODY": True,
 }
 
 # email

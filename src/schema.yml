@@ -1,13 +1,18 @@
 openapi: 3.0.3
 info:
-  title: Your Project API
+  title: Resume Builder API
   version: 1.0.0
-  description: Your project description
 paths:
   /api/auth/confirm-emal/{token}/:
     get:
       operationId: auth_confirm_emal_retrieve
       parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        description: Bearer token
+        required: true
       - in: path
         name: token
         schema:
@@ -19,26 +24,65 @@ paths:
       - {}
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+              examples:
+                SuccessfulResponse:
+                  value:
+                    message: string
+                  summary: successful response
+          description: ''
   /api/auth/login/:
     post:
       operationId: auth_login_create
       tags:
       - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Login'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Login'
+        required: true
       security:
       - {}
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+              examples:
+                AccessTokenResponse:
+                  value:
+                    access_token: token
+                  summary: Access Token Response
+          description: ''
   /api/auth/logout/:
     post:
       operationId: auth_logout_create
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        description: Bearer token
+        required: true
       tags:
       - auth
       security:
       - {}
       responses:
-        '200':
+        '204':
           description: No response body
   /api/auth/refresh-token/:
     post:
@@ -49,50 +93,141 @@ paths:
       - {}
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+              examples:
+                AccessTokenResponse:
+                  value:
+                    access_token: token
+                  summary: Access Token Response
+          description: ''
   /api/auth/register/:
     post:
       operationId: auth_register_create
       tags:
       - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Register'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Register'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Register'
+        required: true
       security:
       - {}
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+              examples:
+                AccessTokenResponse:
+                  value:
+                    access_token: token
+                  summary: Access Token Response
+          description: ''
   /api/auth/send-verification-email/:
     post:
       operationId: auth_send_verification_email_create
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        description: Bearer token
+        required: true
       tags:
       - auth
       security:
       - {}
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+              examples:
+                SuccessfulResponse:
+                  value:
+                    message: string
+                  summary: successful response
+          description: ''
   /api/resume/:
     get:
-      operationId: resume_retrieve
+      operationId: resume_list
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        description: Bearer token
+        required: true
       tags:
       - resume
       security:
       - {}
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetResume'
+          description: ''
     post:
       operationId: resume_create
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        description: Bearer token
+        required: true
       tags:
       - resume
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateResume'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateResume'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateResume'
+        required: true
       security:
       - {}
       responses:
-        '200':
-          description: No response body
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateResume'
+          description: ''
   /api/resume/{resume_id}/:
     get:
-      operationId: resume_retrieve_2
+      operationId: resume_retrieve
       parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        description: Bearer token
+        required: true
       - in: path
         name: resume_id
         schema:
@@ -105,10 +240,20 @@ paths:
       - {}
       responses:
         '200':
-          description: No response body
-    put:
-      operationId: resume_update
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetResume'
+          description: ''
+    patch:
+      operationId: resume_partial_update
       parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        description: Bearer token
+        required: true
       - in: path
         name: resume_id
         schema:
@@ -117,14 +262,35 @@ paths:
         required: true
       tags:
       - resume
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateResume'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateResume'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateResume'
       security:
       - {}
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateResume'
+          description: ''
     delete:
       operationId: resume_destroy
       parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        description: Bearer token
+        required: true
       - in: path
         name: resume_id
         schema:
@@ -138,24 +304,1147 @@ paths:
       responses:
         '204':
           description: No response body
-  /api/resume/template/:
-    get:
-      operationId: resume_template_retrieve
+  /api/resume/{resume_id}/sections/:
+    post:
+      operationId: resume_sections_create
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        description: Bearer token
+        required: true
+      - in: path
+        name: resume_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - resume
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSections'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateSections'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateSections'
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetResumeDetail'
+          description: ''
+    patch:
+      operationId: resume_sections_partial_update
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        description: Bearer token
+        required: true
+      - in: path
+        name: resume_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - resume
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateSections'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateSections'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateSections'
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetResumeDetail'
+          description: ''
+    delete:
+      operationId: resume_sections_destroy
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        description: Bearer token
+        required: true
+      - in: path
+        name: resume_id
+        schema:
+          type: string
+          format: uuid
+        required: true
       tags:
       - resume
       security:
       - {}
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetResumeDetail'
+          description: ''
+  /api/resume/template/:
+    get:
+      operationId: resume_template_retrieve
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        description: Bearer token
+        required: true
+      tags:
+      - resume
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResumeTemplate'
+          description: ''
   /api/users/me/:
     get:
       operationId: users_me_retrieve
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        description: Bearer token
+        required: true
       tags:
       - users
       security:
       - {}
       responses:
         '200':
-          description: No response body
-components: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+components:
+  schemas:
+    CourseCreate:
+      type: object
+      properties:
+        course:
+          type: string
+          maxLength: 128
+        institution:
+          type: string
+          maxLength: 128
+        start_end_date:
+          type: string
+          maxLength: 128
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+      required:
+      - sort_order
+    CourseGet:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        course:
+          type: string
+          maxLength: 128
+        institution:
+          type: string
+          maxLength: 128
+        start_end_date:
+          type: string
+          maxLength: 128
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        resume:
+          type: string
+          format: uuid
+      required:
+      - created_at
+      - id
+      - resume
+      - sort_order
+      - updated_at
+    CourseUpdate:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        course:
+          type: string
+          maxLength: 128
+        institution:
+          type: string
+          maxLength: 128
+        start_end_date:
+          type: string
+          maxLength: 128
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+      required:
+      - sort_order
+    CreateResume:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        resume_name:
+          type: string
+          maxLength: 64
+        job_title:
+          type: string
+          maxLength: 64
+        first_name:
+          type: string
+          maxLength: 64
+        last_name:
+          type: string
+          maxLength: 64
+        email:
+          type: string
+          format: email
+          maxLength: 64
+        phone:
+          type: string
+          maxLength: 25
+        country:
+          type: string
+          maxLength: 64
+        city:
+          type: string
+          maxLength: 64
+        summary:
+          type: string
+          maxLength: 500
+        template:
+          allOf:
+          - $ref: '#/components/schemas/ResumeTemplateNested'
+          readOnly: true
+        template_id:
+          type: string
+          format: uuid
+          writeOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - resume_name
+      - template
+      - template_id
+      - updated_at
+    CreateSections:
+      type: object
+      properties:
+        work_experience:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkExperienceCreate'
+        education:
+          type: array
+          items:
+            $ref: '#/components/schemas/EducationCreate'
+        projects:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectCreate'
+        skills:
+          type: array
+          items:
+            $ref: '#/components/schemas/SkillCreate'
+        courses:
+          type: array
+          items:
+            $ref: '#/components/schemas/CourseCreate'
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/LinkCreate'
+        languages:
+          type: array
+          items:
+            $ref: '#/components/schemas/LanguageCreate'
+    EducationCreate:
+      type: object
+      properties:
+        school:
+          type: string
+          maxLength: 128
+        degree:
+          type: string
+          maxLength: 128
+        city:
+          type: string
+          maxLength: 128
+        start_end_date:
+          type: string
+          maxLength: 128
+        description:
+          type: string
+          maxLength: 500
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+      required:
+      - sort_order
+    EducationGet:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        school:
+          type: string
+          maxLength: 128
+        degree:
+          type: string
+          maxLength: 128
+        city:
+          type: string
+          maxLength: 128
+        start_end_date:
+          type: string
+          maxLength: 128
+        description:
+          type: string
+          maxLength: 500
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        resume:
+          type: string
+          format: uuid
+      required:
+      - created_at
+      - id
+      - resume
+      - sort_order
+      - updated_at
+    EducationUpdate:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        school:
+          type: string
+          maxLength: 128
+        degree:
+          type: string
+          maxLength: 128
+        city:
+          type: string
+          maxLength: 128
+        start_end_date:
+          type: string
+          maxLength: 128
+        description:
+          type: string
+          maxLength: 500
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+      required:
+      - sort_order
+    GetResume:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        resume_name:
+          type: string
+          maxLength: 64
+        job_title:
+          type: string
+          maxLength: 64
+        template:
+          type: string
+          format: uuid
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - resume_name
+      - updated_at
+    GetResumeDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        resume_name:
+          type: string
+          maxLength: 64
+        job_title:
+          type: string
+          maxLength: 64
+        first_name:
+          type: string
+          maxLength: 64
+        last_name:
+          type: string
+          maxLength: 64
+        email:
+          type: string
+          format: email
+          maxLength: 64
+        phone:
+          type: string
+          maxLength: 25
+        country:
+          type: string
+          maxLength: 64
+        city:
+          type: string
+          maxLength: 64
+        summary:
+          type: string
+          maxLength: 500
+        template:
+          allOf:
+          - $ref: '#/components/schemas/ResumeTemplateNested'
+          readOnly: true
+        work_experience:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkExperienceGet'
+          readOnly: true
+        projects:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectGet'
+          readOnly: true
+        education:
+          type: array
+          items:
+            $ref: '#/components/schemas/EducationGet'
+          readOnly: true
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/LinkGet'
+          readOnly: true
+        skills:
+          type: array
+          items:
+            $ref: '#/components/schemas/SkillGet'
+          readOnly: true
+        courses:
+          type: array
+          items:
+            $ref: '#/components/schemas/CourseGet'
+          readOnly: true
+        languages:
+          type: array
+          items:
+            $ref: '#/components/schemas/LanguageGet'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - courses
+      - created_at
+      - education
+      - id
+      - languages
+      - links
+      - projects
+      - resume_name
+      - skills
+      - template
+      - updated_at
+      - work_experience
+    LanguageCreate:
+      type: object
+      properties:
+        language:
+          type: string
+          maxLength: 128
+        level:
+          type: string
+          maxLength: 128
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+      required:
+      - sort_order
+    LanguageGet:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        language:
+          type: string
+          maxLength: 128
+        level:
+          type: string
+          maxLength: 128
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        resume:
+          type: string
+          format: uuid
+      required:
+      - created_at
+      - id
+      - resume
+      - sort_order
+      - updated_at
+    LanguageUpdate:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        language:
+          type: string
+          maxLength: 128
+        level:
+          type: string
+          maxLength: 128
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+      required:
+      - sort_order
+    LinkCreate:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 128
+        link:
+          type: string
+          format: uri
+          maxLength: 1000
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+      required:
+      - sort_order
+    LinkGet:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          maxLength: 128
+        link:
+          type: string
+          format: uri
+          maxLength: 1000
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        resume:
+          type: string
+          format: uuid
+      required:
+      - created_at
+      - id
+      - resume
+      - sort_order
+      - updated_at
+    LinkUpdate:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          maxLength: 128
+        link:
+          type: string
+          format: uri
+          maxLength: 1000
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+      required:
+      - sort_order
+    Login:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+      required:
+      - email
+      - password
+    PatchedUpdateResume:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        resume_name:
+          type: string
+          maxLength: 64
+        job_title:
+          type: string
+          maxLength: 64
+        first_name:
+          type: string
+          maxLength: 64
+        last_name:
+          type: string
+          maxLength: 64
+        email:
+          type: string
+          format: email
+          maxLength: 64
+        phone:
+          type: string
+          maxLength: 25
+        country:
+          type: string
+          maxLength: 64
+        city:
+          type: string
+          maxLength: 64
+        summary:
+          type: string
+          maxLength: 500
+        template:
+          allOf:
+          - $ref: '#/components/schemas/ResumeTemplateNested'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedUpdateSections:
+      type: object
+      properties:
+        work_experience:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkExperienceUpdate'
+        education:
+          type: array
+          items:
+            $ref: '#/components/schemas/EducationUpdate'
+        projects:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectUpdate'
+        skills:
+          type: array
+          items:
+            $ref: '#/components/schemas/SkillUpdate'
+        courses:
+          type: array
+          items:
+            $ref: '#/components/schemas/CourseUpdate'
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/LinkUpdate'
+        languages:
+          type: array
+          items:
+            $ref: '#/components/schemas/LanguageUpdate'
+    ProjectCreate:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 128
+        link:
+          type: string
+          format: uri
+          maxLength: 1000
+        link_to_repo:
+          type: string
+          format: uri
+          maxLength: 1000
+        description:
+          type: string
+          maxLength: 500
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+      required:
+      - sort_order
+    ProjectGet:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          maxLength: 128
+        link:
+          type: string
+          format: uri
+          maxLength: 1000
+        link_to_repo:
+          type: string
+          format: uri
+          maxLength: 1000
+        description:
+          type: string
+          maxLength: 500
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        resume:
+          type: string
+          format: uuid
+      required:
+      - created_at
+      - id
+      - resume
+      - sort_order
+      - updated_at
+    ProjectUpdate:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          maxLength: 128
+        link:
+          type: string
+          format: uri
+          maxLength: 1000
+        link_to_repo:
+          type: string
+          format: uri
+          maxLength: 1000
+        description:
+          type: string
+          maxLength: 500
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+      required:
+      - sort_order
+    Register:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        username:
+          type: string
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          maxLength: 128
+        password:
+          type: string
+          writeOnly: true
+          maxLength: 128
+      required:
+      - email
+      - name
+      - password
+      - username
+    ResumeTemplate:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 128
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - name
+      - updated_at
+    ResumeTemplateNested:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 128
+      required:
+      - id
+      - name
+    SkillCreate:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 128
+        level:
+          type: integer
+          maximum: 100
+          minimum: 0
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+      required:
+      - level
+      - sort_order
+    SkillGet:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          maxLength: 128
+        level:
+          type: integer
+          maximum: 100
+          minimum: 0
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        resume:
+          type: string
+          format: uuid
+      required:
+      - created_at
+      - id
+      - level
+      - resume
+      - sort_order
+      - updated_at
+    SkillUpdate:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          maxLength: 128
+        level:
+          type: integer
+          maximum: 100
+          minimum: 0
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+      required:
+      - level
+      - sort_order
+    UpdateResume:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        resume_name:
+          type: string
+          maxLength: 64
+        job_title:
+          type: string
+          maxLength: 64
+        first_name:
+          type: string
+          maxLength: 64
+        last_name:
+          type: string
+          maxLength: 64
+        email:
+          type: string
+          format: email
+          maxLength: 64
+        phone:
+          type: string
+          maxLength: 25
+        country:
+          type: string
+          maxLength: 64
+        city:
+          type: string
+          maxLength: 64
+        summary:
+          type: string
+          maxLength: 500
+        template:
+          allOf:
+          - $ref: '#/components/schemas/ResumeTemplateNested'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - resume_name
+      - template
+      - updated_at
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        username:
+          type: string
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          maxLength: 128
+        email_verified:
+          type: boolean
+      required:
+      - email
+      - id
+      - username
+    WorkExperienceCreate:
+      type: object
+      properties:
+        job_title:
+          type: string
+          maxLength: 128
+        employer:
+          type: string
+          maxLength: 128
+        city:
+          type: string
+          maxLength: 128
+        start_end_date:
+          type: string
+          maxLength: 128
+        description:
+          type: string
+          maxLength: 500
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+      required:
+      - sort_order
+    WorkExperienceGet:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        job_title:
+          type: string
+          maxLength: 128
+        employer:
+          type: string
+          maxLength: 128
+        city:
+          type: string
+          maxLength: 128
+        start_end_date:
+          type: string
+          maxLength: 128
+        description:
+          type: string
+          maxLength: 500
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        resume:
+          type: string
+          format: uuid
+      required:
+      - created_at
+      - id
+      - resume
+      - sort_order
+      - updated_at
+    WorkExperienceUpdate:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        job_title:
+          type: string
+          maxLength: 128
+        employer:
+          type: string
+          maxLength: 128
+        city:
+          type: string
+          maxLength: 128
+        start_end_date:
+          type: string
+          maxLength: 128
+        description:
+          type: string
+          maxLength: 500
+        sort_order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+      required:
+      - sort_order

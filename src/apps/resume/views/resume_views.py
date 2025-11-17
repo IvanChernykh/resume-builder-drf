@@ -54,14 +54,14 @@ def resume_view(request: Request):
     responses={204: None},
 )
 @extend_schema(parameters=[AUTH_API_HEADER])
-@api_view(["GET", "PUT", "DELETE"])
+@api_view(["GET", "PATCH", "DELETE"])
 def resume_detail_view(request: Request, resume_id: str):
     data = cast(dict, request.data)
 
     if request.method == "GET":
         return get_resume(request.user, resume_id)
 
-    if request.method == "PUT":
+    if request.method == "PATCH":
         return update_resume(data, request.user, resume_id)
 
     if request.method == "DELETE":
