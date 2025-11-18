@@ -16,7 +16,22 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = UserModel.objects.create(**validated_data)
         return user
 
+    def validate_password(self, value):
+        if len(value) < 8:
+            raise serializers.ValidationError("Password too short")
+        return value
+
 
 class LoginSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-    password = serializers.CharField()
+    email = serializers.EmailField(max_length=128)
+    password = serializers.CharField(max_length=128)
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(max_length=128)
+    new_password = serializers.CharField(max_length=128)
+
+    def validate_new_password(self, value):
+        if len(value) < 8:
+            raise serializers.ValidationError("Password too short")
+        return value

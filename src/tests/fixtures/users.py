@@ -1,6 +1,7 @@
 import pytest
 
 from apps.users.models import UserModel
+from django.contrib.auth.hashers import make_password
 
 
 @pytest.fixture
@@ -9,7 +10,7 @@ def user_1():
         name="Johnny Silverhand",
         username="silverhand",
         email="joknny@mail.com",
-        password="secret123",
+        password=make_password("secret123"),
     )
 
 
@@ -19,5 +20,5 @@ def user_2():
         name="Shrek",
         username="swampguy",
         email="shrek@mail.com",
-        password="swampislove",
+        password=make_password("getouttamyswamp"),
     )

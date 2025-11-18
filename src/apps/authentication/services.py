@@ -1,17 +1,23 @@
 import hashlib
 import os
+from typing import cast
 
-from django.contrib.auth.hashers import check_password
+from django.contrib.auth.hashers import check_password, make_password
 from django.core.mail import send_mail
 from rest_framework import status
 from rest_framework.response import Response
 
+from apps.authentication.serializers import ChangePasswordSerializer
 from apps.users.models import UserModel
 from config.settings.jwt import JWT_REFRESH_TTL_SECONDS
 from config.settings.redis import REDIS_JWT
 from config.settings.settings import DEBUG
 from libs.jwt_auth.token import JwtTokenPair, generate_jwt_pair
 from utils.constants.cookies import COOKIE_REFRESH_TOKEN
+
+
+def check_user_password(password: str | None, encoded: str) -> bool:
+    return check_password(password, encoded)
 
 
 def get_redis_jwt_name(user: UserModel, token="") -> str:
@@ -58,7 +64,7 @@ def authenticate_user(data: dict[str, str]) -> UserModel | None:
     except UserModel.DoesNotExist:
         return None
 
-    if not check_password(password, user.password):
+    if not check_user_password(password, user.password):
         return None
 
     return user
@@ -90,3 +96,23 @@ def send_verification_email(user: UserModel, token: str) -> Response:
         return Response(
             {"message": "Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+
+def change_password(data: dict[str, str], user: UserModel):
+    serializer = ChangePasswordSerializer(data=data)
+
+    if serializer.is_valid():
+        data = cast(dict, serializer.validated_data)
+
+        if not check_user_password(data["old_password"], user.password):
+            return Response(
+                {"message": ["Incorrect old password"]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user.password = make_password(data["new_password"])
+        user.save(update_fields=["password"])
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

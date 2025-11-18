@@ -1,6 +1,7 @@
 from django.urls import path
 
 from apps.authentication.views import (
+    change_password_view,
     confirm_email_view,
     get_csrf_token_view,
     login_view,
@@ -24,4 +25,5 @@ urlpatterns = [
     ),
     path("confirm-emal/<str:token>/", confirm_email_view, name="confirm_email"),
     path("csrf-token/", get_csrf_token_view, name="get_csrf_token"),
+    path("change-password/", change_password_view, name="change_password"),
 ]

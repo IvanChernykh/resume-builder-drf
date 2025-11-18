@@ -15,6 +15,7 @@ from apps.authentication.models import EmailConfirmationTokenModel
 from apps.authentication.serializers import LoginSerializer, RegisterSerializer
 from apps.authentication.services import (
     authenticate_user,
+    change_password,
     get_redis_jwt_name,
     get_token_pair_response,
     send_verification_email,
@@ -180,3 +181,10 @@ def get_csrf_token_view(request: Request):
     )
 
     return response
+
+
+@api_view(["POST"])
+def change_password_view(request: Request):
+    data = cast(dict, request.data)
+
+    return change_password(data, request.user)
