@@ -25,5 +25,5 @@ urlpatterns = [
     ),
     path("confirm-emal/<str:token>/", confirm_email_view, name="confirm_email"),
     path("csrf-token/", get_csrf_token_view, name="get_csrf_token"),
-    path("change-password/", change_password_view, name="change_password"),
+    path("password/change/", change_password_view, name="change_password"),
 ]
