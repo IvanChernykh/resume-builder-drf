@@ -10,6 +10,7 @@ from apps.resume.serializers.resume_section_serializer import (
 )
 from apps.resume.serializers.resume_serializer import GetResumeDetailSerializer
 from apps.resume.services.resume_section_services import (
+    copy_resume_sections,
     create_resume_sections,
     delete_resume_sections,
     update_resume_sections,
@@ -32,3 +33,11 @@ def resume_section_view(request: Request, resume_id: str):
         return update_resume_sections(user, data, resume_id)
     if request.method == "DELETE":
         return delete_resume_sections(user, data, resume_id)
+
+
+@api_view(["POST"])
+def resume_section_copy_view(request: Request, resume_id: str):
+    user = request.user
+    data = cast(dict, request.data)
+
+    return copy_resume_sections(user, data, resume_id)

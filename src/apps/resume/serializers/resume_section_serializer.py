@@ -237,3 +237,14 @@ class DeleteSectionsSerializer(serializers.Serializer):
     skills = serializers.ListField(child=serializers.UUIDField(), required=False)
     languages = serializers.ListField(child=serializers.UUIDField(), required=False)
     courses = serializers.ListField(child=serializers.UUIDField(), required=False)
+
+
+class CopySectionSerializer(serializers.Serializer):
+    target_resume = serializers.UUIDField()
+    work_experience = serializers.UUIDField(required=False)
+    education = serializers.UUIDField(required=False)
+    projects = serializers.UUIDField(required=False)
+    links = serializers.UUIDField(required=False)
+    skills = serializers.UUIDField(required=False)
+    languages = serializers.UUIDField(required=False)
+    courses = serializers.UUIDField(required=False)

@@ -16,6 +16,7 @@ from apps.resume.models import (
     WorkExperienceModel,
 )
 from apps.resume.serializers.resume_section_serializer import (
+    CopySectionSerializer,
     CreateSectionsSerializer,
     DeleteSectionsSerializer,
     UpdateSectionsSerializer,
@@ -36,6 +37,9 @@ section_mapping = {
 }
 
 
+# -------------------------------------------------------------------
+# create sections
+# -------------------------------------------------------------------
 def create_entities(model: Type[T], resume, items: list[dict] | None):
     if not items:
         return
@@ -64,6 +68,9 @@ def create_resume_sections(
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+# -------------------------------------------------------------------
+# update sections
+# -------------------------------------------------------------------
 def update_entities(model: Type[T], resume, items: list[dict] | None):
     if not items:
         return
@@ -94,6 +101,9 @@ def update_resume_sections(
     return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+# -------------------------------------------------------------------
+# delete sections
+# -------------------------------------------------------------------
 def delete_resume_sections(
     user: UserModel, data: dict[str, list], resume_id: str
 ) -> Response:
@@ -116,3 +126,44 @@ def delete_resume_sections(
         return Response(data=get_serializer.data, status=status.HTTP_200_OK)
 
     return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# -------------------------------------------------------------------
+# copy sections
+# -------------------------------------------------------------------
+def copy_section_entity(
+    resume: ResumeModel, target_resume: ResumeModel, model: Type[T], id: str
+):
+    section_to_copy = get_object_or_404(model, pk=id, resume=resume)
+
+    section_data = {
+        field.name: getattr(section_to_copy, field.name)
+        for field in model._meta.get_fields()
+        if field.concrete and field.name not in ("id", "resume")
+    }
+
+    model.objects.create(resume=target_resume, **section_data)
+
+
+def copy_resume_sections(user: UserModel, data: dict[str, list], resume_id: str):
+    resume = get_object_or_404(ResumeModel, pk=resume_id, owner=user)
+    serializer = CopySectionSerializer(data=data)
+
+    if serializer.is_valid():
+        validated_data = cast(dict[str, str], serializer.validated_data)
+
+        target_resume = get_object_or_404(
+            ResumeModel, pk=validated_data["target_resume"], owner=user
+        )
+
+        for section_name, model in section_mapping.items():
+            id = validated_data.get(section_name)
+
+            if not id:
+                continue
+
+            copy_section_entity(resume, target_resume, model, id)
+
+        return Response(status=status.HTTP_200_OK)
+
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

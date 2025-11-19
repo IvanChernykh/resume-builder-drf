@@ -8,10 +8,12 @@ from apps.resume.models import (
     EducationModel,
     LinkModel,
     ProjectModel,
+    ResumeModel,
     SkillModel,
     WorkExperienceModel,
 )
 from apps.resume.services.resume_section_services import (
+    copy_resume_sections,
     create_resume_sections,
     delete_resume_sections,
     update_resume_sections,
@@ -164,3 +166,80 @@ def test_delete_sections_should_return_404(resume_user_1, user_2):
     data = {}
     with pytest.raises(Http404):
         delete_resume_sections(user_2, data, resume_user_1.id)
+
+
+# ---------- copy sections ----------
+@pytest.mark.django_db
+def test_copy_section_success(
+    user_1,
+    resume_user_1,
+    make_skills_resume_user_1,
+    resume_template,
+):
+    target_resume = ResumeModel.objects.create(
+        resume_name="Target Resume",
+        template=resume_template,
+        owner=user_1,
+    )
+
+    skills = make_skills_resume_user_1(1)
+    skill = skills[0]
+
+    data: dict = {
+        "target_resume": str(target_resume.id),
+        "skills": str(skill.id),
+    }
+
+    response = copy_resume_sections(user_1, data, resume_user_1.id)
+
+    assert response.status_code == status.HTTP_200_OK
+
+    copied = SkillModel.objects.filter(resume=target_resume).first()
+    assert copied is not None
+    assert copied.title == skill.title
+    assert copied.level == skill.level
+    assert copied.sort_order == skill.sort_order
+
+
+@pytest.mark.django_db
+def test_copy_section_from_not_owned_resume(
+    user_1,
+    resume_user_2,
+    make_skills_resume_user_1,
+    resume_template,
+):
+    skills = make_skills_resume_user_1(1)
+    skill = skills[0]
+
+    target_resume = ResumeModel.objects.create(
+        resume_name="Target Resume",
+        template=resume_template,
+        owner=user_1,
+    )
+
+    data: dict = {
+        "target_resume": str(target_resume.id),
+        "skills": str(skill.id),
+    }
+
+    with pytest.raises(Http404):
+        copy_resume_sections(user_1, data, resume_user_2.id)
+
+
+@pytest.mark.django_db
+def test_copy_section_to_not_owned_resume(
+    user_1,
+    resume_user_1,
+    resume_user_2,
+    make_skills_resume_user_1,
+):
+    skills = make_skills_resume_user_1(1)
+    skill = skills[0]
+
+    data: dict = {
+        "target_resume": str(resume_user_2.id),
+        "skills": str(skill.id),
+    }
+
+    with pytest.raises(Http404):
+        copy_resume_sections(user_1, data, resume_user_1.id)
