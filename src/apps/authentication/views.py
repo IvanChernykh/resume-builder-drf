@@ -212,6 +212,7 @@ PW_RESET_KEY = "pw_reset:{}"
 
 
 @api_view(["POST"])
+@authentication_classes([])
 def reset_password_request_view(request: Request):
     serializer = ResetPasswordRequestSerializer(data=request.data)
 
@@ -241,6 +242,7 @@ def reset_password_request_view(request: Request):
 
 
 @api_view(["POST"])
+@authentication_classes([])
 def reset_password_confirm_view(request: Request, token: str):
     serializer = ResetPasswordConfirmSerializer(data=request.data)
 
