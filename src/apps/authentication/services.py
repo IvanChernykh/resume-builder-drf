@@ -98,7 +98,24 @@ def send_verification_email(user: UserModel, token: str) -> Response:
         )
 
 
-def change_password(data: dict[str, str], user: UserModel):
+def send_password_reset_email(user, token) -> Response:
+    reset_url = f"{os.getenv('FRONTEND_URL')}/reset-password/?token={token}"
+    message = f"Reset your password:\n{reset_url}"
+
+    try:
+        send_mail(
+            subject="Password reset",
+            message=message,
+            recipient_list=[user.email],
+            from_email="noreply@resumebuilder.com",
+        )
+        return Response({"message": "Password reset email has been sent"}, status=200)
+    except Exception as e:
+        print("Mail error:", e)
+        return Response({"message": "Error"}, status=500)
+
+
+def change_password(data: dict[str, str], user: UserModel) -> Response:
     serializer = ChangePasswordSerializer(data=data)
 
     if serializer.is_valid():

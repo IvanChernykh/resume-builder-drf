@@ -10,18 +10,23 @@ from rest_framework.decorators import (
 )
 from rest_framework.request import Request
 from rest_framework.response import Response
-
-from apps.authentication.models import EmailConfirmationTokenModel
-from apps.authentication.serializers import LoginSerializer, RegisterSerializer
+from django.contrib.auth.hashers import make_password
+from apps.authentication.serializers import (
+    LoginSerializer,
+    RegisterSerializer,
+    ResetPasswordConfirmSerializer,
+    ResetPasswordRequestSerializer,
+)
 from apps.authentication.services import (
     authenticate_user,
     change_password,
     get_redis_jwt_name,
     get_token_pair_response,
+    send_password_reset_email,
     send_verification_email,
 )
 from apps.users.models import UserModel
-from config.settings.redis import REDIS_JWT
+from config.settings.redis import REDIS_EMAIL_TOKEN, REDIS_JWT, REDIS_PW_RESET_TOEKN
 from config.settings.settings import DEBUG
 from libs.jwt_auth.token import validate_jwt_token
 from libs.middleware.csrf_permission import DoubleSubmitCSRF
@@ -118,6 +123,10 @@ def logout_view(request: Request):
     return response
 
 
+EMAIL_VERIFICATION_TTL = 600
+EMAIL_VERIFICATION_KEY = "email_verify:{}"
+
+
 @extend_schema(
     methods=["POST"],
     responses={200: MESSAGE_SUCCESS_API_RESPONSE},
@@ -127,11 +136,17 @@ def logout_view(request: Request):
 def send_verification_email_view(request: Request):
     user = request.user
 
-    EmailConfirmationTokenModel.objects.filter(user=user).delete()
+    for key in REDIS_EMAIL_TOKEN.scan_iter(match="email_verify:*"):
+        uid = REDIS_EMAIL_TOKEN.get(key)
+        if str(uid) == str(user.id):
+            REDIS_EMAIL_TOKEN.delete(key)
 
-    new_token = EmailConfirmationTokenModel.objects.create(user=user)
+    token = secrets.token_urlsafe(32)
 
-    return send_verification_email(user, str(new_token.id))
+    redis_key = EMAIL_VERIFICATION_KEY.format(token)
+    REDIS_EMAIL_TOKEN.setex(redis_key, EMAIL_VERIFICATION_TTL, user.id)
+
+    return send_verification_email(user, token)
 
 
 @extend_schema(
@@ -143,16 +158,16 @@ def send_verification_email_view(request: Request):
 def confirm_email_view(request: Request, token: str):
     user: UserModel = request.user
 
-    try:
-        confirmation_token = EmailConfirmationTokenModel.objects.select_related(
-            "user"
-        ).get(pk=token)
-    except EmailConfirmationTokenModel.DoesNotExist:
+    redis_key = EMAIL_VERIFICATION_KEY.format(token)
+
+    stored_user_id = REDIS_EMAIL_TOKEN.get(redis_key)
+
+    if stored_user_id is None:
         return Response(
-            {"message": "token not found"}, status=status.HTTP_404_NOT_FOUND
+            {"message": "token not found or expired"}, status=status.HTTP_404_NOT_FOUND
         )
 
-    if confirmation_token.is_expired or not confirmation_token.belongs_to_user(user):
+    if str(user.id) != str(stored_user_id):
         return Response(
             {"message": "invalid token"}, status=status.HTTP_401_UNAUTHORIZED
         )
@@ -160,7 +175,7 @@ def confirm_email_view(request: Request, token: str):
     user.email_verified = True
     user.save(update_fields=["email_verified"])
 
-    confirmation_token.delete()
+    REDIS_EMAIL_TOKEN.delete(redis_key)
 
     return Response(
         {"message": "Your email has been verified"}, status=status.HTTP_200_OK
@@ -188,3 +203,62 @@ def change_password_view(request: Request):
     data = cast(dict, request.data)
 
     return change_password(data, request.user)
+
+
+PW_RESET_TTL = 600
+PW_RESET_KEY = "pw_reset:{}"
+
+
+@api_view(["POST"])
+def reset_password_request_view(request: Request):
+    serializer = ResetPasswordRequestSerializer(data=request.data)
+
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    email = cast(dict, serializer.validated_data)["email"]
+
+    try:
+        user = UserModel.objects.get(email=email)
+    except UserModel.DoesNotExist:
+        return Response({"message": "email has been sent"}, status=status.HTTP_200_OK)
+
+    for key in REDIS_PW_RESET_TOEKN.scan_iter(match="pw_reset:*"):
+        uid = REDIS_PW_RESET_TOEKN.get(key)
+        if str(uid) == str(user.id):
+            REDIS_PW_RESET_TOEKN.delete(key)
+
+    token = secrets.token_urlsafe(32)
+
+    redis_key = PW_RESET_KEY.format(token)
+    REDIS_PW_RESET_TOEKN.setex(redis_key, PW_RESET_TTL, user.id)
+
+    send_password_reset_email(user, token)
+
+    return Response({"message": "email has been sent"}, status=status.HTTP_200_OK)
+
+
+@api_view(["POST"])
+def reset_password_confirm_view(request: Request, token: str):
+    serializer = ResetPasswordConfirmSerializer(data=request.data)
+
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=400)
+
+    new_password = cast(dict, serializer.validated_data)["new_password"]
+
+    user_id = REDIS_PW_RESET_TOEKN.get(token)
+    if not user_id:
+        return Response({"message": "Invalid or expired token"}, status=400)
+
+    try:
+        user = UserModel.objects.get(pk=user_id)
+    except UserModel.DoesNotExist:
+        return Response({"message": "User not found"}, status=404)
+
+    user.password = make_password(new_password)
+    user.save(update_fields=["password"])
+
+    REDIS_PW_RESET_TOEKN.delete(token)
+
+    return Response({"message": "Password has been reset"}, status=200)
