@@ -17,12 +17,14 @@ from apps.authentication.serializers import (
     ResetPasswordConfirmSerializer,
     ResetPasswordRequestSerializer,
 )
-from apps.authentication.services import (
-    authenticate_user,
+from apps.authentication.services.password_services import (
     change_password,
+    send_password_reset_email,
+)
+from apps.authentication.services.services import (
+    authenticate_user,
     get_redis_jwt_name,
     get_token_pair_response,
-    send_password_reset_email,
     send_verification_email,
 )
 from apps.users.models import UserModel

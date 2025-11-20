@@ -2,7 +2,7 @@ import pytest
 from django.contrib.auth.hashers import check_password
 from rest_framework import status
 
-from apps.authentication.services import change_password
+from apps.authentication.services.password_services import change_password
 
 
 @pytest.mark.django_db
