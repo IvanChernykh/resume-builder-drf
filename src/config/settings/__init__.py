@@ -8,3 +8,4 @@ from .database import *
 from .jwt import *
 from .redis import *
 from .settings import *
+from .celery import *

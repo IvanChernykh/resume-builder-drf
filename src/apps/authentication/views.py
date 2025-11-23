@@ -1,6 +1,8 @@
+import os
 import secrets
 from typing import cast
 
+from django.contrib.auth.hashers import make_password
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import (
@@ -10,22 +12,22 @@ from rest_framework.decorators import (
 )
 from rest_framework.request import Request
 from rest_framework.response import Response
-from django.contrib.auth.hashers import make_password
+
 from apps.authentication.serializers import (
     LoginSerializer,
     RegisterSerializer,
     ResetPasswordConfirmSerializer,
     ResetPasswordRequestSerializer,
 )
-from apps.authentication.services.password_services import (
-    change_password,
-    send_password_reset_email,
-)
+from apps.authentication.services.password_services import change_password
 from apps.authentication.services.services import (
     authenticate_user,
     get_redis_jwt_name,
     get_token_pair_response,
+)
+from apps.authentication.tasks.emails import (
     send_verification_email,
+    send_password_reset_email,
 )
 from apps.users.models import UserModel
 from config.settings.redis import REDIS_EMAIL_TOKEN, REDIS_JWT, REDIS_PW_RESET_TOEKN
@@ -136,7 +138,13 @@ EMAIL_VERIFICATION_KEY = "email_verify:{}"
 )
 @api_view(["POST"])
 def send_verification_email_view(request: Request):
-    user = request.user
+    user: UserModel = request.user
+
+    if user.email_verified:
+        return Response(
+            {"message": "your email is already verified"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     for key in REDIS_EMAIL_TOKEN.scan_iter(match="email_verify:*"):
         uid = REDIS_EMAIL_TOKEN.get(key)
@@ -148,7 +156,16 @@ def send_verification_email_view(request: Request):
     redis_key = EMAIL_VERIFICATION_KEY.format(token)
     REDIS_EMAIL_TOKEN.setex(redis_key, EMAIL_VERIFICATION_TTL, user.id)
 
-    return send_verification_email(user, token)
+    verify_url = f"{os.getenv('FRONTEND_URL')}/verify-email/?token={token}"
+
+    send_verification_email.delay(
+        user_username=user.username, user_email=user.email, verify_url=verify_url
+    )
+
+    return Response(
+        {"message": "Verification email has been sent to your email adress"},
+        status=status.HTTP_200_OK,
+    )
 
 
 @extend_schema(
@@ -224,6 +241,7 @@ def reset_password_request_view(request: Request):
     try:
         user = UserModel.objects.get(email=email)
     except UserModel.DoesNotExist:
+        print("error")
         return Response({"message": "email has been sent"}, status=status.HTTP_200_OK)
 
     for key in REDIS_PW_RESET_TOEKN.scan_iter(match="pw_reset:*"):
@@ -234,9 +252,13 @@ def reset_password_request_view(request: Request):
     token = secrets.token_urlsafe(32)
 
     redis_key = PW_RESET_KEY.format(token)
-    REDIS_PW_RESET_TOEKN.setex(redis_key, PW_RESET_TTL, user.id)
+    REDIS_PW_RESET_TOEKN.setex(redis_key, PW_RESET_TTL, str(user.id))
 
-    send_password_reset_email(user, token)
+    reset_url = f"{os.getenv('FRONTEND_URL')}/reset-password/?token={token}"
+    print("CALLING CELERY TASK...")
+    send_password_reset_email.delay(user_email=user.email, reset_url=reset_url)
+    print("AFTER DELAY")
+    # send_password_reset_email.delay(user_email=user.email, reset_url=reset_url)
 
     return Response({"message": "email has been sent"}, status=status.HTTP_200_OK)
 
