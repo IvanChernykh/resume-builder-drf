@@ -25,9 +25,7 @@ def send_verification_email(self, user_username: str, user_email: str, verify_ur
 
 @app.task(bind=True, max_retries=5, default_retry_delay=30, queue="emails")
 def send_password_reset_email(self, user_email: str, reset_url: str):
-    print("task started")
     try:
-        print(123)
         send_mail(
             subject="Password reset",
             message=f"Reset your password:\n{reset_url}",

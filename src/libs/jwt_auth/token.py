@@ -68,5 +68,5 @@ def validate_jwt_token(token: str, is_access_token):
         print("Token exired")
         return None
     except jwt.InvalidTokenError as e:
-        print(f"invalit token: {e}")
+        print(f"invalid token: {e}")
         return None

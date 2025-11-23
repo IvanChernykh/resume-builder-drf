@@ -241,7 +241,6 @@ def reset_password_request_view(request: Request):
     try:
         user = UserModel.objects.get(email=email)
     except UserModel.DoesNotExist:
-        print("error")
         return Response({"message": "email has been sent"}, status=status.HTTP_200_OK)
 
     for key in REDIS_PW_RESET_TOEKN.scan_iter(match="pw_reset:*"):
@@ -255,10 +254,8 @@ def reset_password_request_view(request: Request):
     REDIS_PW_RESET_TOEKN.setex(redis_key, PW_RESET_TTL, str(user.id))
 
     reset_url = f"{os.getenv('FRONTEND_URL')}/reset-password/?token={token}"
-    print("CALLING CELERY TASK...")
+
     send_password_reset_email.delay(user_email=user.email, reset_url=reset_url)
-    print("AFTER DELAY")
-    # send_password_reset_email.delay(user_email=user.email, reset_url=reset_url)
 
     return Response({"message": "email has been sent"}, status=status.HTTP_200_OK)
 
